@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.linalg import solve_continuous_are, solve_discrete_are
+from scipy.linalg import solve_continuous_are
 from acrobot_env import AcrobotEnv
 import time
 
@@ -12,17 +12,10 @@ env = AcrobotEnv()
 goal_state = np.array([np.pi, 0, 0, 0])
 f, A, B = env.linearized_dynamics(goal_state, 0)
 
-Ad = np.eye(4) + env.dt * A
-Bd = env.dt * B
-
 P = solve_continuous_are(A, B, Q, R)
 L = np.linalg.inv(R) @ B.T @ P
 
-Pd = solve_discrete_are(Ad, Bd, Q, R)
-Ld = np.linalg.inv(R + B.T @ P @ B) @ B.T @ P @ A
-
 print(L)
-print(Ld)
 
 state = env.reset(state=x0)
 env.render()

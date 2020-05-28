@@ -1,6 +1,6 @@
 import numpy as np
 from numpy.linalg import inv
-from scipy.linalg import solve_discrete_are, solve_continuous_are
+from scipy.linalg import solve_continuous_are
 from servo_acrobot_env import AcrobotEnv
 from extended_kalman_filter import update
 import time
