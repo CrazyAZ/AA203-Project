@@ -136,7 +136,7 @@ class AcrobotEnv():
         ddtheta2_ddtheta2 = (dtau_ddtheta2 + d2 / d1 * dphi1_ddtheta2) / ddtheta2_den
 
         ddtheta1_dtheta1 = - (d2 * ddtheta2_dtheta1 + dphi1_dtheta1) / d1
-        ddtheta1_dtheta2 = - ((dd2_dtheta2 * ddtheta2 + d2 * ddtheta2_dtheta2 + dphi1_dtheta2) * d1 - (d2 * dtheta2 + phi1) * dd1_dtheta2) / d1 ** 2
+        ddtheta1_dtheta2 = - ((dd2_dtheta2 * ddtheta2 + d2 * ddtheta2_dtheta2 + dphi1_dtheta2) * d1 - (d2 * ddtheta2 + phi1) * dd1_dtheta2) / d1 ** 2
         ddtheta1_ddtheta1 = -(d2 * ddtheta2_ddtheta1 + dphi1_ddtheta1) / d1
         ddtheta1_ddtheta2 = -(d2 * ddtheta2_ddtheta2 + dphi1_ddtheta2) / d1
 
