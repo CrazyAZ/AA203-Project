@@ -16,7 +16,7 @@ from numpy import sin, cos, pi
 
 class AcrobotEnv():
 
-    dt = 0.017
+    dt = 0.01
 
     LINK_LENGTH_1 = 1.  # [m]
     LINK_LENGTH_2 = 1.  # [m]
@@ -24,7 +24,8 @@ class AcrobotEnv():
     LINK_MASS_2 = 1.  #: [kg] mass of link 2
     LINK_COM_POS_1 = 0.5  #: [m] position of the center of mass of link 1
     LINK_COM_POS_2 = 0.5  #: [m] position of the center of mass of link 2
-    LINK_MOI = 1.  #: moments of inertia for both links
+    LINK_MOI_1 = 1./3  #: moment of inertia around pivot for link 1
+    LINK_MOI_2 = 1./3  #: moment of inertia around pivot for link 1
 
     g = 9.8
 
@@ -52,18 +53,18 @@ class AcrobotEnv():
         l1 = self.LINK_LENGTH_1
         lc1 = self.LINK_COM_POS_1
         lc2 = self.LINK_COM_POS_2
-        I1 = self.LINK_MOI
-        I2 = self.LINK_MOI
+        I1 = self.LINK_MOI_1
+        I2 = self.LINK_MOI_2
         g = self.g
         theta1 = x[0]
         theta2 = x[1]
         dtheta1 = x[2]
         dtheta2 = x[3]
-        d2 = m2 * (lc2 ** 2 + l1 * lc2 * cos(theta2)) + I2
-        d1 = m1 * lc1 ** 2 + m2 * (l1 ** 2 + lc2 ** 2 + 2 * l1 * lc2 * cos(theta2)) + I1 + I2
+        d2 = m2 * l1 * lc2 * cos(theta2) + I2
+        d1 = m2 * (l1 ** 2 + 2 * l1 * lc2 * cos(theta2)) + I1 + I2
         phi2 = m2 * lc2 * g * sin(theta1 + theta2)
         phi1 = - m2 * l1 * lc2 * (dtheta2 ** 2 + 2 * dtheta2 * dtheta1) * sin(theta2) + (m1 * lc1 + m2 * l1) * g * sin(theta1) + phi2
-        ddtheta2 = (u + d2 / d1 * phi1 - m2 * l1 * lc2 * dtheta1 ** 2 * sin(theta2) - phi2) / (m2 * lc2 ** 2 + I2 - d2 ** 2 / d1)
+        ddtheta2 = (u + d2 / d1 * phi1 - m2 * l1 * lc2 * dtheta1 ** 2 * sin(theta2) - phi2) / (I2 - d2 ** 2 / d1)
         ddtheta1 = -(d2 * ddtheta2 + phi1) / d1
 
         # ddtheta1 -= self.coeff_friction * dtheta1
@@ -77,20 +78,20 @@ class AcrobotEnv():
         l1 = self.LINK_LENGTH_1
         lc1 = self.LINK_COM_POS_1
         lc2 = self.LINK_COM_POS_2
-        I1 = self.LINK_MOI
-        I2 = self.LINK_MOI
+        I1 = self.LINK_MOI_1
+        I2 = self.LINK_MOI_2
         g = self.g
         theta1 = x_bar[0]
         theta2 = x_bar[1]
         dtheta1 = x_bar[2]
         dtheta2 = x_bar[3]
         tau = u_bar
-        d2 = m2 * (lc2 ** 2 + l1 * lc2 * cos(theta2)) + I2
-        d1 = m1 * lc1 ** 2 + m2 * (l1 ** 2 + lc2 ** 2 + 2 * l1 * lc2 * cos(theta2)) + I1 + I2
+        d2 = m2 * l1 * lc2 * cos(theta2) + I2
+        d1 = m2 * (l1 ** 2 + 2 * l1 * lc2 * cos(theta2)) + I1 + I2
         phi2 = m2 * lc2 * g * sin(theta1 + theta2)
         phi1 = - m2 * l1 * lc2 * (dtheta2 ** 2 + 2 * dtheta2 * dtheta1) * sin(theta2) + (m1 * lc1 + m2 * l1) * g * sin(theta1) + phi2
         ddtheta2_num = (tau + d2 / d1 * phi1 - m2 * l1 * lc2 * dtheta1 ** 2 * sin(theta2) - phi2)
-        ddtheta2_den = m2 * lc2 ** 2 + I2 - d2 ** 2 / d1
+        ddtheta2_den = I2 - d2 ** 2 / d1
         ddtheta2 = ddtheta2_num / ddtheta2_den
         ddtheta1 = -(d2 * ddtheta2 + phi1) / d1
 
@@ -115,7 +116,7 @@ class AcrobotEnv():
         ddtheta2_ddtheta2 = (dtau_ddtheta2 + d2 / d1 * dphi1_ddtheta2) / ddtheta2_den
 
         ddtheta1_dtheta1 = - (d2 * ddtheta2_dtheta1 + dphi1_dtheta1) / d1
-        ddtheta1_dtheta2 = - ((dd2_dtheta2 * ddtheta2 + d2 * ddtheta2_dtheta2 + dphi1_dtheta2) * d1 - (d2 * dtheta2 + phi1) * dd1_dtheta2) / d1 ** 2
+        ddtheta1_dtheta2 = - ((dd2_dtheta2 * ddtheta2 + d2 * ddtheta2_dtheta2 + dphi1_dtheta2) * d1 - (d2 * ddtheta2 + phi1) * dd1_dtheta2) / d1 ** 2
         ddtheta1_ddtheta1 = -(d2 * ddtheta2_ddtheta1 + dphi1_ddtheta1) / d1
         ddtheta1_ddtheta2 = -(d2 * ddtheta2_ddtheta2 + dphi1_ddtheta2) / d1
 
@@ -134,6 +135,32 @@ class AcrobotEnv():
 
         return (f_bar, A, B)
 
+
+    def energy(self, x, u):
+        m1 = self.LINK_MASS_1
+        m2 = self.LINK_MASS_2
+        l1 = self.LINK_LENGTH_1
+        lc1 = self.LINK_COM_POS_1
+        lc2 = self.LINK_COM_POS_2
+        I1 = self.LINK_MOI_1
+        I2 = self.LINK_MOI_2
+        g = self.g
+        theta1 = x[0]
+        theta2 = x[1]
+        dtheta1 = x[2]
+        dtheta2 = x[3]
+
+        y1 = - lc1 * cos(theta1)
+        y2 = - l1 * cos(theta1) - lc2 * cos(theta1 + theta2)
+        PE = m1 * g * y1 + m2 * g * y2
+
+        T1 = 1/2 * I1 * dtheta1 ** 2
+        T2 = 1/2 * (m2 * l1 ** 2 + I2 + 2 * m2 * l1 * lc2 * cos(theta2)) * dtheta1 ** 2 + 1/2 * I2 * dtheta2 ** 2 + (I2 + m2 * l1 * lc2 * cos(theta2)) * dtheta1 * dtheta2
+        KE = T1 + T2
+
+        return PE + KE
+
+
     def f(self, x, u):
         s_augmented = np.append(x, u)
 
@@ -141,7 +168,7 @@ class AcrobotEnv():
 
         xn = np.zeros(4)
         xn[0] = solve.y[0, 0]
-        xn[1] = wrap(solve.y[1, 0], -pi, pi)
+        xn[1] = solve.y[1, 0]
         xn[2] = bound(solve.y[2, 0], -self.MAX_VEL_1, self.MAX_VEL_1)
         xn[3] = bound(solve.y[3, 0], -self.MAX_VEL_2, self.MAX_VEL_2)
 
@@ -157,7 +184,7 @@ class AcrobotEnv():
 
         self.state = self.f(x, u)
         
-        self.state += np.random.multivariate_normal([0, 0, 0, 0], [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0.0001, 0], [0, 0, 0, 0.0001]])
+        #self.state += np.random.multivariate_normal([0, 0, 0, 0], [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0.0001, 0], [0, 0, 0, 0.0001]])
 
         return self.state
 
