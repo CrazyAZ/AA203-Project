@@ -3,9 +3,12 @@ from scipy.linalg import solve_continuous_are
 from acrobot_env import AcrobotEnv
 import time
 
-x0 = [np.pi, 0.0, 0.0, 0.0]
+x0 = [3.1, 0.0, 0.0, 0.0]
 
-Q = np.eye(4)
+Q = np.array([[10, 0, 0, 0],
+              [0, 10, 0, 0],
+              [0, 0, 1, 0],
+              [0, 0, 0, 1]])
 R = np.eye(1)
 
 env = AcrobotEnv()

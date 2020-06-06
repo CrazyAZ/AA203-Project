@@ -24,8 +24,8 @@ class AcrobotEnv():
     LINK_MASS_2 = 1.  #: [kg] mass of link 2
     LINK_COM_POS_1 = 0.5  #: [m] position of the center of mass of link 1
     LINK_COM_POS_2 = 0.5  #: [m] position of the center of mass of link 2
-    LINK_MOI_1 = 1./3  #: moment of inertia around pivot for link 1
-    LINK_MOI_2 = 1./3  #: moment of inertia around pivot for link 1
+    LINK_MOI_1 = 1.  #: moment of inertia around pivot for link 1
+    LINK_MOI_2 = 1.  #: moment of inertia around pivot for link 1
 
     g = 9.8
 

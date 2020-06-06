@@ -30,7 +30,8 @@ u = 0
 start = time.monotonic()
 for _ in range(10000):
     E = env.energy(state, u)
-    if abs(env.state[0] - np.pi) > 0.3: 
+    if abs(env.state[0] - np.pi) > 2: 
+        print('Energy')
         u_bar = 2 * expit((E - goal_energy) * env.state[2]) - 1
         u = - k1 * env.state[1] - k2 * env.state[3] + k3 * u_bar
     else:
