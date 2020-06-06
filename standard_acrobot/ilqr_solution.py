@@ -32,8 +32,8 @@ def ilqr_solution(env, Q, R, Qf, goal, x0, u_bar, num_steps):
         x_bar[t+1] = env.f(x_bar[t], u_bar[t])
     x_bar_prev = np.copy(x_bar)
 
-    while np.linalg.norm(u_bar - u_bar_prev, np.inf) > epsilon:
-        print(np.linalg.norm(u_bar - u_bar_prev, np.inf))
+    while np.linalg.norm(u_bar - u_bar_prev) > epsilon:
+        print(np.linalg.norm(u_bar - u_bar_prev))
         qf = Qf @ (x_bar[-1] - goal)
         P = Qf
         p = qf
