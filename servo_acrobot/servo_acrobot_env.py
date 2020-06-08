@@ -38,12 +38,13 @@ class AcrobotEnv():
 
     coeff_friction = 0.1
 
-    state_noise_covariance = np.array([[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0.0001, 0], [0, 0, 0, 0.0001]])
+    state_noise_covariance = np.array([[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0.00001, 0], [0, 0, 0, 0.00001]])
 
-    C = np.array([[1, 0, 0, 0],
-                  [0, 0, 1, 0]])
+    # C = np.array([[1, 0, 0, 0],
+    #               [0, 0, 1, 0]])
+    C = np.array([[1, 0, 0, 0]])
 
-    measurement_noise_covariance = 0.0001 * np.eye(2)
+    measurement_noise_covariance = 0.00001 * np.eye(1)
 
     def __init__(self):
         self.viewer = None
@@ -179,7 +180,7 @@ class AcrobotEnv():
         self.state = self.f(x, u)
         self.state += np.random.multivariate_normal([0, 0, 0, 0], self.state_noise_covariance)
 
-        return self.C @ self.state + np.random.multivariate_normal([0, 0], self.measurement_noise_covariance)
+        return self.C @ self.state + np.random.multivariate_normal([0], self.measurement_noise_covariance)
 
     def _dsdt(self, t, x_augmented):
         u = x_augmented[-1]
