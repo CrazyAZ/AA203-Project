@@ -2,7 +2,7 @@ import numpy as np
 from numpy.linalg import inv
 from scipy.linalg import solve_continuous_are
 from real_acrobot_env import AcrobotEnv
-from discrete_extended_kalman_filter import update
+from extended_kalman_filter import update
 import serial
 import struct
 import time
@@ -43,6 +43,7 @@ while True:
     
 
     u = - L @ (state_estimate - goal_state)
+    u[0] = min(max(u[0], -np.pi * 3/4), np.pi * 3/4)
     print(state_estimate)
     ser.write(struct.pack("<f", u))
 

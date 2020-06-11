@@ -3,7 +3,7 @@ from numpy.linalg import inv
 from scipy.integrate import solve_ivp
 
 
-def update(env, x_prev, u, z, P_prev):
+def update(env, x_prev, u, z, P_prev, dt):
 
     X = np.append(x_prev, P_prev)
 
@@ -14,7 +14,7 @@ def update(env, x_prev, u, z, P_prev):
         dP = A @ P + P @ A.T + env.state_noise_covariance
         return np.append(dx_hat, dP)
 
-    solve = solve_ivp(dXdt, [0, env.dt], X, t_eval=[env.dt])
+    solve = solve_ivp(dXdt, [0, dt], X, t_eval=[dt])
     x_pred = solve.y[:4, 0]
     P_pred = np.reshape(solve.y[4:, 0], (4,4))
 
