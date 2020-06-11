@@ -16,7 +16,7 @@ Q = np.array([[10, 0, 0, 0],
               [0, 0, 1, 0],
               [0, 0, 0, 1]])
 
-R = 80*np.eye(1)
+R = 50*np.eye(1)
 
 env = AcrobotEnv()
 goal_state = np.array([np.pi, 0, 0, 0])
