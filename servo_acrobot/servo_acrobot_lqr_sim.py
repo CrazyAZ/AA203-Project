@@ -2,13 +2,17 @@ import numpy as np
 from numpy.linalg import inv
 from scipy.linalg import solve_continuous_are
 from servo_acrobot_env import AcrobotEnv
-from extended_kalman_filter import update
+from discrete_extended_kalman_filter import update
 import time
 
 x0 = [np.pi, 0.0, 0.0, 0.0]
 
-Q = np.eye(4)
-R = np.eye(1)
+Q = np.array([[10, 0, 0, 0],
+              [0, 10, 0, 0],
+              [0, 0, 1, 0],
+              [0, 0, 0, 1]])
+
+R = 80*np.eye(1)
 
 env = AcrobotEnv()
 goal_state = np.array([np.pi, 0, 0, 0])
@@ -21,7 +25,7 @@ env.reset(state=x0)
 env.render()
 time.sleep(1)
 
-Sigma = np.zeros((4,4))
+Sigma = 0.01 * np.eye(4)
 state_estimate = x0
 C = env.C
 Sw = env.state_noise_covariance
@@ -32,7 +36,7 @@ N = 1000
 start = time.monotonic()
 for t in range(N):
     u = - L @ (state_estimate - goal_state)
-    print(u)
+    # print(u)
     state_measurement = env.step(u)
 
     state_estimate, Sigma = update(env, state_estimate, u, state_measurement, Sigma)
@@ -40,7 +44,6 @@ for t in range(N):
     print(state_estimate)
     print(env.state)
     print()
-    
     env.render()
 end = time.monotonic()
 print(end-start)

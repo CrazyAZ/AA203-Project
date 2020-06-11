@@ -10,7 +10,7 @@ def update(env, x_prev, u, z, P_prev):
     def dXdt(t, X):
         x_hat = X[:4]
         P = np.reshape(X[4:], (4,4))
-        dx_hat, A, _ = env.linearized_dynamics(x_hat, u)
+        dx_hat, A, _ = env.linearized_dynamics(x_hat, u[0])
         dP = A @ P + P @ A.T + env.state_noise_covariance
         return np.append(dx_hat, dP)
 

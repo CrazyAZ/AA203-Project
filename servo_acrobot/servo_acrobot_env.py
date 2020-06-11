@@ -16,29 +16,30 @@ from numpy import sin, cos, pi
 
 class AcrobotEnv():
 
-    dt = 0.01
+    dt = 0.001
 
-    LINK_LENGTH_1 = 1.  # [m]
-    LINK_LENGTH_2 = 1.  # [m]
-    LINK_MASS_1 = 1.  #: [kg] mass of link 1
-    LINK_MASS_2 = 1.  #: [kg] mass of link 2
-    LINK_COM_POS_1 = 0.5  #: [m] position of the center of mass of link 1
-    LINK_COM_POS_2 = 0.5  #: [m] position of the center of mass of link 2
-    LINK_MOI = 1.  #: moments of inertia for both links
+    LINK_LENGTH_1 = 0.305  # [m]
+    LINK_LENGTH_2 = 0.35  # [m]
+    LINK_MASS_1 = 0.130  #: [kg] mass of link 1
+    LINK_MASS_2 = 0.088  #: [kg] mass of link 2
+    LINK_COM_POS_1 = 0.21  #: [m] position of the center of mass of link 1
+    LINK_COM_POS_2 = 0.185  #: [m] position of the center of mass of link 2
+    LINK_MOI_1 = 7.6e-3  #: moment of inertia around pivot for link 1
+    LINK_MOI_2 = 3.6e-3  #: moment of inertia around pivot for link 2
 
     g = 9.8
 
-    KP = 10
-    KD = 0.05
+    KP = 0.4757
+    KD = 0.0434 
 
     MAX_VEL_1 = 4 * pi
-    MAX_VEL_2 = 9 * pi
+    MAX_VEL_2 = pi / 0.45
 
     torque_noise_max = 0.
 
     coeff_friction = 0.1
 
-    state_noise_covariance = np.array([[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0.00001, 0], [0, 0, 0, 0.00001]])
+    state_noise_covariance = np.array([[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0.000001, 0], [0, 0, 0, 0.000001]])
 
     # C = np.array([[1, 0, 0, 0],
     #               [0, 0, 1, 0]])
@@ -63,8 +64,8 @@ class AcrobotEnv():
         l1 = self.LINK_LENGTH_1
         lc1 = self.LINK_COM_POS_1
         lc2 = self.LINK_COM_POS_2
-        I1 = self.LINK_MOI
-        I2 = self.LINK_MOI
+        I1 = self.LINK_MOI_1
+        I2 = self.LINK_MOI_2
         g = self.g
         kp = self.KP
         kd = self.KD
@@ -93,8 +94,8 @@ class AcrobotEnv():
         l1 = self.LINK_LENGTH_1
         lc1 = self.LINK_COM_POS_1
         lc2 = self.LINK_COM_POS_2
-        I1 = self.LINK_MOI
-        I2 = self.LINK_MOI
+        I1 = self.LINK_MOI_1
+        I2 = self.LINK_MOI_2
         g = self.g
         kp = self.KP
         kd = self.KD
@@ -196,7 +197,7 @@ class AcrobotEnv():
 
         if self.viewer is None:
             self.viewer = rendering.Viewer(500,500)
-            bound = self.LINK_LENGTH_1 + self.LINK_LENGTH_2 + 0.2  # 2.2 for default
+            bound = self.LINK_LENGTH_1 + self.LINK_LENGTH_2 + 0.04  # 2.2 for default
             self.viewer.set_bounds(-bound,bound,-bound,bound)
 
         if s is None: return None
@@ -212,12 +213,12 @@ class AcrobotEnv():
         link_lengths = [self.LINK_LENGTH_1, self.LINK_LENGTH_2]
 
         for ((x,y),th,llen) in zip(xys, thetas, link_lengths):
-            l,r,t,b = 0, llen, .1, -.1
+            l,r,t,b = 0, llen, .03, -.03
             jtransform = rendering.Transform(rotation=th, translation=(x,y))
             link = self.viewer.draw_polygon([(l,b), (l,t), (r,t), (r,b)])
             link.add_attr(jtransform)
             link.set_color(0,.8, .8)
-            circ = self.viewer.draw_circle(.1)
+            circ = self.viewer.draw_circle(.03)
             circ.set_color(.8, .8, 0)
             circ.add_attr(jtransform)
 
