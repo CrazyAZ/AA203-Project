@@ -16,7 +16,7 @@ from numpy import sin, cos, pi
 
 class AcrobotEnv():
 
-    dt = 0.006
+    dt = 0.01
 
     LINK_LENGTH_1 = 0.305  # [m]
     LINK_LENGTH_2 = 0.35  # [m]
@@ -35,6 +35,8 @@ class AcrobotEnv():
 
     MAX_VEL_1 = 4 * pi
     MAX_VEL_2 = pi / 0.45
+
+    deadband = 0.0072
 
     torque_noise_max = 0.
 

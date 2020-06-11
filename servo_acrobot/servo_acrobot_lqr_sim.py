@@ -15,7 +15,7 @@ Q = np.array([[10, 0, 0, 0],
 R = 50*np.eye(1)
 
 env = AcrobotEnv()
-goal_state = np.array([np.pi, 0, 0, 0])
+goal_state = np.array([np.pi, 0.0, 0.0, 0.0])
 f, A, B = env.linearized_dynamics(goal_state, 0)
 
 P = solve_continuous_are(A, B, Q, R)
@@ -36,6 +36,8 @@ N = 1000
 start = time.monotonic()
 for t in range(N):
     u = - L @ (state_estimate - goal_state)
+    if abs(u[0] - state_estimate[1]) < env.deadband:
+        u[0] = state_estimate[1]
     u[0] = min(max(u[0], -np.pi * 3/4), np.pi * 3/4)
 
     # print(u)
