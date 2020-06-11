@@ -9,24 +9,34 @@
 #define ENCODER_CPR 8192
 
 Servo servo;
-Encoder encoder(16, 15);
+Encoder encoder(15, 16);
+
+unsigned long prev_time = 0;
 
 void setup() {
   Serial.begin(115200);
   servo.attach(SERVO_PIN);
-  servo.writeMicroseconds(ZERO);
-  while (!Serial.available()) {}
-  encoder.write(ENCODER_CPR / 2);
 }
 
 void loop() {
-  if (Serial.available()) {
-    float servo_pos, encoder_pos;
-    Serial.readBytes((char*) &servo_pos, sizeof(servo_pos));
-    int servo_micros = ZERO + servo_pos / M_PI * MICROS_PER_PI;
-    servo.writeMicroseconds(servo_micros);
 
-    encoder_pos = encoder.read() * 2 * M_PI / ENCODER_CPR; 
-    Serial.write((char*) &encoder_pos, sizeof(encoder_pos));
+  servo.writeMicroseconds(ZERO);
+  while (!Serial.available()) {}
+  float servo_pos;
+  Serial.readBytes((char*) &servo_pos, sizeof(servo_pos));
+  int servo_micros = ZERO + servo_pos / M_PI * MICROS_PER_PI;
+  encoder.write(0);
+  servo.writeMicroseconds(servo_micros);
+
+  for (size_t i = 0; i < 1000;) {
+  unsigned long curr_time = micros();
+    if (curr_time - prev_time >= 1000) {
+        prev_time = curr_time;
+
+      float encoder_pos = encoder.read() * 2 * M_PI / ENCODER_CPR; 
+      Serial.write((char*) &encoder_pos, sizeof(encoder_pos));
+      i++;
+    }
   }
+
 }
