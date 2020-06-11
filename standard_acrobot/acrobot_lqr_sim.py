@@ -3,13 +3,13 @@ from scipy.linalg import solve_continuous_are
 from acrobot_env import AcrobotEnv
 import time
 
-x0 = [3.1, 0.0, 0.0, 0.0]
+x0 = [np.pi, 0.0, 0.0, 0.0]
 
 Q = np.array([[10, 0, 0, 0],
               [0, 10, 0, 0],
               [0, 0, 1, 0],
               [0, 0, 0, 1]])
-R = np.eye(1)
+R = 80*np.eye(1)
 
 env = AcrobotEnv()
 goal_state = np.array([np.pi, 0, 0, 0])

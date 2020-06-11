@@ -18,14 +18,14 @@ class AcrobotEnv():
 
     dt = 0.01
 
-    LINK_LENGTH_1 = 1.  # [m]
-    LINK_LENGTH_2 = 1.  # [m]
-    LINK_MASS_1 = 1.  #: [kg] mass of link 1
-    LINK_MASS_2 = 1.  #: [kg] mass of link 2
-    LINK_COM_POS_1 = 0.5  #: [m] position of the center of mass of link 1
-    LINK_COM_POS_2 = 0.5  #: [m] position of the center of mass of link 2
-    LINK_MOI_1 = 1.  #: moment of inertia around pivot for link 1
-    LINK_MOI_2 = 1.  #: moment of inertia around pivot for link 1
+    LINK_LENGTH_1 = 0.305  # [m]
+    LINK_LENGTH_2 = 0.35  # [m]
+    LINK_MASS_1 = 0.130  #: [kg] mass of link 1
+    LINK_MASS_2 = 0.088  #: [kg] mass of link 2
+    LINK_COM_POS_1 = 0.21  #: [m] position of the center of mass of link 1
+    LINK_COM_POS_2 = 0.185  #: [m] position of the center of mass of link 2
+    LINK_MOI_1 = 7.6e-3  #: moment of inertia around pivot for link 1
+    LINK_MOI_2 = 3.6e-3  #: moment of inertia around pivot for link 2
 
     g = 9.8
 
@@ -184,7 +184,7 @@ class AcrobotEnv():
 
         self.state = self.f(x, u)
         
-        #self.state += np.random.multivariate_normal([0, 0, 0, 0], [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0.0001, 0], [0, 0, 0, 0.0001]])
+        self.state += np.random.multivariate_normal([0, 0, 0, 0], [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0.0001, 0], [0, 0, 0, 0.0001]])
 
         return self.state
 
@@ -202,7 +202,7 @@ class AcrobotEnv():
 
         if self.viewer is None:
             self.viewer = rendering.Viewer(500,500)
-            bound = self.LINK_LENGTH_1 + self.LINK_LENGTH_2 + 0.2  # 2.2 for default
+            bound = self.LINK_LENGTH_1 + self.LINK_LENGTH_2 + 0.04  # 2.2 for default
             self.viewer.set_bounds(-bound,bound,-bound,bound)
 
         if s is None: return None
@@ -218,12 +218,12 @@ class AcrobotEnv():
         link_lengths = [self.LINK_LENGTH_1, self.LINK_LENGTH_2]
 
         for ((x,y),th,llen) in zip(xys, thetas, link_lengths):
-            l,r,t,b = 0, llen, .1, -.1
+            l,r,t,b = 0, llen, .03, -.03
             jtransform = rendering.Transform(rotation=th, translation=(x,y))
             link = self.viewer.draw_polygon([(l,b), (l,t), (r,t), (r,b)])
             link.add_attr(jtransform)
             link.set_color(0,.8, .8)
-            circ = self.viewer.draw_circle(.1)
+            circ = self.viewer.draw_circle(.03)
             circ.set_color(.8, .8, 0)
             circ.add_attr(jtransform)
 
