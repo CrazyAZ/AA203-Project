@@ -9,7 +9,7 @@
 #define ENCODER_CPR 8192
 
 Servo servo;
-Encoder encoder(15, 16);
+Encoder encoder(16, 15);
 
 unsigned long prev_time = 0;
 
@@ -38,5 +38,7 @@ void loop() {
       i++;
     }
   }
+
+  delay(2000);
 
 }
