@@ -42,8 +42,6 @@ class AcrobotEnv():
 
     state_noise_covariance = np.array([[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0.000001, 0], [0, 0, 0, 0.0001]])
 
-    # C = np.array([[1, 0, 0, 0],
-    #               [0, 0, 1, 0]])
     C = np.array([[1, 0, 0, 0]])
 
     measurement_noise_covariance = 0.0001 * np.eye(1)
@@ -86,7 +84,6 @@ class AcrobotEnv():
         ddtheta1 = -(d2 * ddtheta2 + phi1) / d1
 
         ddtheta1 -= self.coeff_friction * dtheta1
-        # ddtheta2 -= self.coeff_friction * dtheta2
 
         return (dtheta1, dtheta2, ddtheta1, ddtheta2)
     
