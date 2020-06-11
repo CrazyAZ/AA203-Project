@@ -9,16 +9,18 @@ import struct
 ser = serial.Serial('/dev/tty.usbmodem74956901', 115200)
 T = np.array([0.001 * t for t in range(1000)])
 theta = np.ndarray((1000,))
-setpoint = np.pi / 4 * np.random.rand()
+setpoint = np.pi / 2 * np.random.rand()
 print(setpoint)
 
 ser.write(struct.pack("<f", -setpoint))
 
 for t in range(1000):
     encoder_pos = struct.unpack('f', ser.read(4))[0]
-    theta[t] = -encoder_pos
+    theta[t] = encoder_pos
 
-def smooth(y, size=50, order=2, deriv=0):
+ser.close()
+
+def smooth(y, size=20, order=2, deriv=0):
 
     n = len(y)
     m = size
@@ -42,16 +44,19 @@ def smooth(y, size=50, order=2, deriv=0):
 
     return result
     
-# stheta = smooth(theta)
-# sdtheta = smooth(theta, deriv=1)
-# sddtheta = smooth(theta, deriv=2)
+stheta = smooth(theta)
+sdtheta = smooth(theta, deriv=1)
+sddtheta = smooth(theta, deriv=2)
 
-# I = 3.6e-3
-# error = setpoint - stheta
-# dtheta_squared = np.square(sdtheta)
+I = 3.6e-3
+Kp = 1.2
+Kd = 0.09
+Ks = 0.4
 
-# K = cvx.Variable(3)
-# cost = cvx.norm((K[0] * error - K[1] * sdtheta - K[2] * dtheta_squared) - I * sddtheta, p=1)
+#saturated_error = Ks * np.tanh((setpoint - stheta) / Ks)
+
+# K = cvx.Variable(2)
+# cost = cvx.norm((K[0] * saturated_error - K[1] * sdtheta) - I * sddtheta, p=2)
 # prob = cvx.Problem(cvx.Minimize(cost))
 # prob.solve()
 
@@ -60,22 +65,8 @@ def smooth(y, size=50, order=2, deriv=0):
 
 # print(Kp)
 # print(Kd)
-# print(K.value[2])
-# contoller = np.array([0.4757 * (setpoint - stheta[t]) - 0.0434 * sdtheta[t] for t in range(len(T))]) / I
 
-
-# fig, axs = plt.subplots(3)
-# axs[0].plot(T, stheta)
-# axs[0].plot([T[0], T[-1]], [setpoint, setpoint], "--")
-# axs[1].plot(T, sdtheta)
-# axs[2].plot(T, sddtheta)
-# axs[2].plot(T, contoller)
-# plt.show()
-
-I = 3.6e-3
-Kp = 1.2
-Kd = 0.09
-Ks = 0.4
+contoller = np.array([Kp * Ks * np.tanh((setpoint - stheta[t]) / Ks) - Kd * sdtheta[t] for t in range(len(T))])
 
 def contoller_dynamics(t, x):
     tau = Kp * Ks * np.tanh((setpoint - x[0]) / Ks) - Kd * x[1]
@@ -83,7 +74,16 @@ def contoller_dynamics(t, x):
 
 sim = solve_ivp(contoller_dynamics, [0, T[-1]], [0, 0], t_eval=T)
 
-plt.plot(T, theta)
-plt.plot(T, sim.y[0,:])
-plt.plot([T[0], T[-1]], [setpoint, setpoint], "--")
+
+fig, axs = plt.subplots(2, sharex=True)
+fig.suptitle('Real and Modelled Step Response of Servo')
+axs[0].plot([T[0], T[-1]], [setpoint, setpoint], '--', color='black')
+axs[0].plot(T, theta, label='Real')
+axs[0].plot(T, sim.y[0,:], label='Model')
+axs[0].legend()
+axs[0].set(ylabel=r'$\theta$ (rad)')
+axs[1].plot(T, I * sddtheta)
+axs[1].plot(T, contoller)
+axs[1].set(ylabel=r'$\tau$ (kg $\cdot$ m)')
+axs[1].set(xlabel='$t$ (sec)')
 plt.show()

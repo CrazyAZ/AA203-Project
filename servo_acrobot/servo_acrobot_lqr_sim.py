@@ -2,7 +2,7 @@ import numpy as np
 from numpy.linalg import inv
 from scipy.linalg import solve_continuous_are
 from servo_acrobot_env import AcrobotEnv
-from discrete_extended_kalman_filter import update
+from extended_kalman_filter import update
 import time
 
 x0 = [np.pi, 0.0, 0.0, 0.0]
@@ -38,14 +38,14 @@ for t in range(N):
     u = - L @ (state_estimate - goal_state)
     u[0] = min(max(u[0], -np.pi * 3/4), np.pi * 3/4)
 
-    print(u)
+    # print(u)
     state_measurement = env.step(u)
 
     state_estimate, Sigma = update(env, state_estimate, u, state_measurement, Sigma)
 
-    print(state_estimate)
-    print(env.state)
-    print()
+    # print(state_estimate)
+    # print(env.state)
+    # print()
     env.render()
 end = time.monotonic()
 print(end-start)
