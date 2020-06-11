@@ -12,7 +12,7 @@ Q = np.array([[10, 0, 0, 0],
               [0, 0, 1, 0],
               [0, 0, 0, 1]])
 
-R = 80*np.eye(1)
+R = 50*np.eye(1)
 
 env = AcrobotEnv()
 goal_state = np.array([np.pi, 0, 0, 0])
@@ -25,7 +25,7 @@ env.reset(state=x0)
 env.render()
 time.sleep(1)
 
-Sigma = 0.01 * np.eye(4)
+Sigma = 0.0001 * np.eye(4)
 state_estimate = x0
 C = env.C
 Sw = env.state_noise_covariance
@@ -36,7 +36,9 @@ N = 1000
 start = time.monotonic()
 for t in range(N):
     u = - L @ (state_estimate - goal_state)
-    # print(u)
+    u[0] = min(max(u[0], -np.pi * 3/4), np.pi * 3/4)
+
+    print(u)
     state_measurement = env.step(u)
 
     state_estimate, Sigma = update(env, state_estimate, u, state_measurement, Sigma)

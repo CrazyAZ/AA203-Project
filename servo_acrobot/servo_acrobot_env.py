@@ -16,7 +16,7 @@ from numpy import sin, cos, pi
 
 class AcrobotEnv():
 
-    dt = 0.001
+    dt = 0.006
 
     LINK_LENGTH_1 = 0.305  # [m]
     LINK_LENGTH_2 = 0.35  # [m]
@@ -29,8 +29,9 @@ class AcrobotEnv():
 
     g = 9.8
 
-    KP = 0.4757
-    KD = 0.0434 
+    KP = 1.2
+    KD = 0.09 
+    KS = 0.4
 
     MAX_VEL_1 = 4 * pi
     MAX_VEL_2 = pi / 0.45
@@ -39,13 +40,13 @@ class AcrobotEnv():
 
     coeff_friction = 0.1
 
-    state_noise_covariance = np.array([[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0.000001, 0], [0, 0, 0, 0.000001]])
+    state_noise_covariance = np.array([[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0.000001, 0], [0, 0, 0, 0.0001]])
 
     # C = np.array([[1, 0, 0, 0],
     #               [0, 0, 1, 0]])
     C = np.array([[1, 0, 0, 0]])
 
-    measurement_noise_covariance = 0.00001 * np.eye(1)
+    measurement_noise_covariance = 0.0001 * np.eye(1)
 
     def __init__(self):
         self.viewer = None
@@ -69,13 +70,14 @@ class AcrobotEnv():
         g = self.g
         kp = self.KP
         kd = self.KD
+        ks = self.KS
 
         theta1 = x[0]
         theta2 = x[1]
         dtheta1 = x[2]
         dtheta2 = x[3]
 
-        tau = kp * (u - theta2) - kd * dtheta2
+        tau = kp * ks * np.tanh((u - theta2) / ks) - kd * dtheta2
         d2 = m2 * (lc2 ** 2 + l1 * lc2 * cos(theta2)) + I2
         d1 = m1 * lc1 ** 2 + m2 * (l1 ** 2 + lc2 ** 2 + 2 * l1 * lc2 * cos(theta2)) + I1 + I2
         phi2 = m2 * lc2 * g * sin(theta1 + theta2)
@@ -83,7 +85,7 @@ class AcrobotEnv():
         ddtheta2 = (tau + d2 / d1 * phi1 - m2 * l1 * lc2 * dtheta1 ** 2 * sin(theta2) - phi2) / (m2 * lc2 ** 2 + I2 - d2 ** 2 / d1)
         ddtheta1 = -(d2 * ddtheta2 + phi1) / d1
 
-        # ddtheta1 -= self.coeff_friction * dtheta1
+        ddtheta1 -= self.coeff_friction * dtheta1
         # ddtheta2 -= self.coeff_friction * dtheta2
 
         return (dtheta1, dtheta2, ddtheta1, ddtheta2)
@@ -99,13 +101,14 @@ class AcrobotEnv():
         g = self.g
         kp = self.KP
         kd = self.KD
+        ks = self.KS
 
         theta1 = x_bar[0]
         theta2 = x_bar[1]
         dtheta1 = x_bar[2]
         dtheta2 = x_bar[3]
 
-        tau = kp * (u_bar - theta2) - kd * dtheta2
+        tau = kp * ks * np.tanh((u_bar - theta2) / ks) - kd * dtheta2
         d2 = m2 * (lc2 ** 2 + l1 * lc2 * cos(theta2)) + I2
         d1 = m1 * lc1 ** 2 + m2 * (l1 ** 2 + lc2 ** 2 + 2 * l1 * lc2 * cos(theta2)) + I1 + I2
         phi2 = m2 * lc2 * g * sin(theta1 + theta2)
@@ -116,9 +119,9 @@ class AcrobotEnv():
         ddtheta1 = -(d2 * ddtheta2 + phi1) / d1
 
         dtau_dtheta1 = dtau_ddtheta1 = 0
-        dtau_dtheta2 = -kp
+        dtau_dtheta2 = -kp / np.cosh((u_bar - theta2) / ks)**2
         dtau_ddtheta2 = -kd
-        dtau_du = kp
+        dtau_du = -dtau_dtheta2
 
         dd2_dtheta2 = - m2 * l1 * lc2 * sin(theta2)
         dd1_dtheta2 = 2 * dd2_dtheta2
@@ -139,7 +142,7 @@ class AcrobotEnv():
 
         ddtheta1_dtheta1 = - (d2 * ddtheta2_dtheta1 + dphi1_dtheta1) / d1
         ddtheta1_dtheta2 = - ((dd2_dtheta2 * ddtheta2 + d2 * ddtheta2_dtheta2 + dphi1_dtheta2) * d1 - (d2 * ddtheta2 + phi1) * dd1_dtheta2) / d1 ** 2
-        ddtheta1_ddtheta1 = -(d2 * ddtheta2_ddtheta1 + dphi1_ddtheta1) / d1
+        ddtheta1_ddtheta1 = -(d2 * ddtheta2_ddtheta1 + dphi1_ddtheta1) / d1 - self.coeff_friction
         ddtheta1_ddtheta2 = -(d2 * ddtheta2_ddtheta2 + dphi1_ddtheta2) / d1
 
         ddtheta2_du = dtau_du / ddtheta2_den
@@ -164,7 +167,7 @@ class AcrobotEnv():
 
         xn = np.zeros(4)
         xn[0] = solve.y[0, 0]
-        xn[1] = wrap(solve.y[1, 0], -pi, pi)
+        xn[1] = solve.y[1, 0]
         xn[2] = bound(solve.y[2, 0], -self.MAX_VEL_1, self.MAX_VEL_1)
         xn[3] = bound(solve.y[3, 0], -self.MAX_VEL_2, self.MAX_VEL_2)
 
