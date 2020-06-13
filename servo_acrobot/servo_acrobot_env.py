@@ -42,7 +42,7 @@ class AcrobotEnv():
 
     coeff_friction = 0.1
 
-    state_noise_covariance = np.array([[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0.000001, 0], [0, 0, 0, 0.0001]])
+    state_noise_covariance = np.array([[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0.000001, 0], [0, 0, 0, 0.000001]])
 
     C = np.array([[1, 0, 0, 0]])
 
